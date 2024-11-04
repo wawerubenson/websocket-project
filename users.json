@@ -1,0 +1,13 @@
+
+[
+    {
+        "username": "brynneromondi",
+        "phoneNumber": "3003",
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6ImJyaWFubmphdSIsImV4cGlyZXNBdCI6MTcyOTE5OTE1MywiaXNzdWVkQXQiOjE3MjkxOTU1NTMsInVzZXJUeXBlIjoiY3RpIiwiYWNscyI6WyJhbGlhcy5jdGl1c2VyIl19.Z2UQpImJKUyomHUUva-2h-iY6aXhHzVVQRW_xiXCmkYZXJUeXBlIjoiY3RpIiwiYWNscyI6WyJhbGlhcy5jdGl1c2VyIl19.31_ioQj86wz8xcJE1C3V76pxb2VdIgriFRcyJ__PLFQ"
+    },
+    {
+        "username": "bensonkogi",
+        "phoneNumber": "3400",
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6ImJlbnNvbmtvZ2kiLCJleHBpcmVzVGltZSI6eyJ1bnRpbCI6MTczMDY5ODExM319.8FIOjApT0Er1jym6gcPkd9xPTJUtQyK6_WPTxU07UqQ"
+    }
+]

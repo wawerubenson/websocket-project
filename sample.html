@@ -1,0 +1,958 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <title>XiVOxc API Sample Page</title>
+        <link rel="stylesheet" media="screen" href="/xucassets/bootstrap/css/bootstrap.css"/>
+        <link rel="stylesheet" media="screen" href="/xucassets/stylesheets/main.css">
+        <script src="/xucassets/javascripts/jquery-2.0.3.js" type="text/javascript"></script>
+        <script src="/xucassets/bootstrap/js/bootstrap.js" type="text/javascript"></script>
+        <script src="/xucassets/javascripts/shotgun.js" type="text/javascript"></script>
+        <script src="/xucassets/javascripts/SIPml-api.js" type="text/javascript"></script>
+        <script src="/xucassets/javascripts/cti.js" type="text/javascript"></script>
+        <script src="/xucassets/javascripts/callback.js" type="text/javascript"></script>
+        <script src="/xucassets/javascripts/membership.js" type="text/javascript"></script>
+        <script src="xc_webrtc.js" type="text/javascript"></script>
+        <script src="/xucassets/javascripts/jquery-ui-1.10.2.custom.min.js" type="text/javascript"></script>
+
+
+    <link rel="stylesheet" media="screen" href="/xucassets/stylesheets/pages/sample.css">
+    </head>
+    <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">XiVO - Xuc Sample API page</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <div class="navbar-form navbar-right" id="xuc_logon_panel">
+            <div class="form-group">
+              <input type="text" placeholder="server" class="form-control" id="xuc_server" value="localhost:9000">
+            </div>
+            <div class="form-group">
+              <input type="text" placeholder="Username" class="form-control" id="xuc_username">
+            </div>
+            <div class="form-group">
+              <input type="password" placeholder="Password" class="form-control" id="xuc_password">
+            </div>
+            <div class="form-group">
+              <input type="text" placeholder="Phone number" class="form-control" id="xuc_phoneNumber">
+            </div>
+            <div class="form-group">
+              <input type="text" placeholder="Sofware type" class="form-control" id="xuc_softwareType">
+            </div>
+            <button class="btn btn-success" id="xuc_sign_in">Sign in</button>
+          </div>
+          <div class="navbar-form navbar-right" id="xuc_logoff_panel">
+            <button class="btn btn-warning pull-right" id="xuc_restart" title="Restart">Change User</button>
+          </div>
+        </div><!--/.navbar-collapse -->
+      </div>
+    </div>
+
+    <div class="container-fluid">
+        <div id="main_errors">
+            <h5 class="pull-left"><i>Xivo integration samples using javascript API&nbsp;</i></h5>
+        </div>
+        <input type="hidden" class="form-control" id="xuc_token" value="">
+    </div>
+    <div class="container-fluid" id="last_phone_event">
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-condensed">
+                    <tr>
+                        <th rowspan="2">User Id</th>
+                        <th rowspan="2">Full name</th>
+                        <th rowspan="2">Mobile</th>
+                        <th rowspan="2">Agent Id</th>
+                        <th colspan="5" class="text-center">Voicemail</th>
+                    </tr>
+                    <tr>
+                        <th>Id</th>
+                        <th>Enabled</th>
+                        <th>New Msg</th>
+                        <th>Waiting Msg</th>
+                        <th>Old Msg</th>
+                    </tr>
+                    <tr>
+                        <td><span id="xuc_userId">-</span></td>
+                        <td><span id="xuc_fullName">-</span></td>
+                        <td><span id="xuc_mobileNumber">-</span></td>
+                        <td><span id="xuc_agentId">-</span></td>
+                        <td><span id="xuc_voiceMailId">-</span></td>
+                        <td><span id="xuc_voiceMailEnabled">-</span></td>
+                        <td><span id="xuc_newMessages">-</span></td>
+                        <td><span id="xuc_waitingMessages">-</span></td>
+                        <td><span id="xuc_oldMessages">-</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="col-sm-12">
+                    <h3>Phone</h3>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="enter a number" class="form-control" id="xuc_destination">
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="input-group">
+                                    <input type="text" placeholder="dtmf" class="form-control" id="xuc_cti_dtmf" value="">
+                                    <span class="btn btn-info input-group-addon" type="button" id="xuc_send_dtmf_btn" title="Send DTMF">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <input type="text" placeholder="variables (ex: var1=val1&var2=val2)" class="form-control" id="xuc_dial_variables">
+                            </div>
+                        </div>
+                        <div class="sep"></div>
+                        <div>
+                            <button class="btn btn-success" type="button" id="xuc_dial_btn" title="dial">
+                                <span class="glyphicon glyphicon-earphone" ></span>
+                            </button>
+                            <button class="btn btn-warning" type="button" id="xuc_hold_btn" title="hold">
+                                <span class="glyphicon glyphicon-pause" ></span>
+                            </button>
+                            <button class="btn btn-info" type="button" id="xuc_answer_btn" title="answer">
+                                <span class="glyphicon glyphicon-arrow-up"></span>
+                            </button>
+                            <button class="btn btn-danger" type="button" id="xuc_hangup_btn" title="hangup">
+                                <span class="glyphicon glyphicon-arrow-down"></span>
+                            </button>
+                            <button class="btn btn-danger" type="button" id="xuc_direct_transfer_btn" title="direct transfer">
+                                <span class="glyphicon glyphicon-fast-forward"></span>
+                            </button>
+                            <button class="btn btn-danger" type="button" id="xuc_attended_transfer_btn" title="attended transfer">
+                                <span class="glyphicon glyphicon-chevron-right"></span>
+                            </button>
+                            <button class="btn btn-danger" type="button" id="xuc_complete_transfer_btn" title="complete transfer">
+                                <span class="glyphicon glyphicon-ok"></span>
+                            </button>
+                            <button class="btn btn-danger" type="button" id="xuc_cancel_transfer_btn" title="cancel transfer">
+                                <span class="glyphicon glyphicon-edit"></span>
+                            </button>
+                            <button class="btn btn-success" type="button" id="xuc_setdata_btn" title="set data">
+                                <span class="glyphicon glyphicon-comment"></span>
+                            </button>
+                            <button class="btn btn-success" type="button" id="xuc_dial_mobile_btn" title="dial from mobile">
+                                <span class="glyphicon glyphicon-phone" ></span>
+                            </button>
+                            <button class="btn btn-success" type="button" id="xuc_dial_username_btn" title="dial by username">
+                                <span class="glyphicon glyphicon-user" ></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-offset-4 col-md-4">
+                <audio id="audio_remote" autoplay="autoplay"></audio>
+                <h3>WebRTC</h3>
+                <button class="btn btn-success" id="xuc_init_webrtc" title="init webrtc">Init webRTC</button>
+                <button class="btn btn-danger" id="xuc_stop_webrtc" title="stop webrtc">Stop</button>
+                <div class="row">
+                    <div class="bsep"></div>
+                    <div class="col-sm-7">
+                        <input type="text" placeholder="enter a number" class="form-control" id="xuc_webrtc_dst" value="">
+                    </div>
+                        <div class="col-sm-4">
+                            <div class="input-group">
+                                <input type="text" placeholder="dtmf" class="form-control" id="xuc_webrtc_dtmf" value="">
+                                <span class="btn btn-info input-group-addon" id="xuc_webrtc_send_dtmf" title="send DTMF">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </span>
+                            </div>
+                        </div>
+                </div>
+                <div class="sep"></div>
+                <div>
+                    <button class="btn btn-success" id="xuc_webrtc_dial" title="Dial via webRTC">
+                        <span class="glyphicon glyphicon-earphone"></span>
+                    </button>
+                    <button class="btn btn-success" id="xuc_webrtc_dial_video" title="Dial a video call using WebRTC">
+                        <span class="glyphicon glyphicon-facetime-video"></span>
+                    </button>
+                    <button class="btn btn-warning" id="xuc_webrtc_hold" title="hold">
+                        <span class="glyphicon glyphicon-pause"></span>
+                    </button>
+                    <button class="btn btn-info" id="xuc_webrtc_answer" title="Answer webrtc">
+                        <span class="glyphicon glyphicon-arrow-up"></span>
+                    </button>
+                    <button class="btn btn-danger" type="button" id="xuc_webrtc_hangup" title="hangup">
+                        <span class="glyphicon glyphicon-arrow-down"></span>
+                    </button>
+                    <button class="btn btn-danger" id="xuc_webrtc_attended_transfer_btn" title="attended transfer">
+                        <span class="glyphicon glyphicon-chevron-right"></span>
+                    </button>
+                    <button class="btn btn-danger" id="xuc_webrtc_complete_transfer_btn" title="complete transfer">
+                        <span class="glyphicon glyphicon-ok"></span>
+                    </button>
+                    <button class="btn btn-warning" type="button" id="xuc_webrtc_conference_btn" title="conference">
+                        <span class="glyphicon glyphicon-asterisk"></span>
+                    </button>
+                    <button class="btn btn-warning" type="button" id="xuc_webrtc_toggle_microphone" title="toggle microphone">
+                        <span class="glyphicon glyphicon-volume-up"></span>
+                    </button>
+                </div>
+
+                <div class="row" id="xuc_webrtc_video">
+                    <video muted autoplay="autoplay" id="video-local" class="col-md-12"></video>
+                    <video muted autoplay="autoplay" id="video-remote" class="col-md-12"></video>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Device</a></li>
+            <li role="presentation"><a href="#auth" aria-controls="auth" role="tab" data-toggle="tab">Auth</a></li>
+            <li role="presentation"><a href="#contacts" aria-controls="contacts" role="tab" data-toggle="tab">Contact</a></li>
+            <li role="presentation"><a href="#history_tab" aria-controls="history_tab" role="tab" data-toggle="tab">History</a></li>
+            <li role="presentation"><a href="#conferences_tab" aria-controls="conferences_tab" role="tab" data-toggle="tab">Conference</a></li>
+            <li role="presentation"><a href="#flashtext_tab" aria-controls="flashtext_tab" role="tab" data-toggle="tab">Chat</a></li>
+            <li role="presentation"><a href="#queues_tab" aria-controls="queues_tab" role="tab" data-toggle="tab">Queue</a></li>
+            <li role="presentation"><a href="#agents_tab" aria-controls="agents_tab" role="tab" data-toggle="tab">Agent</a></li>
+            <li role="presentation"><a href="#meetingrooms_tab" aria-controls="meetingrooms_tab" role="tab" data-toggle="tab">Meeting rooms</a></li>
+            <li role="presentation"><a href="#userPreference_tab" aria-controls="userPreference_tab" role="tab" data-toggle="tab">User preferences</a></li>
+        </ul>
+
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane active" id="home">
+            <div class="row">
+                <div class="col-md-3">
+                    <h3>Status / Forward</h3>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="xuc_phoneStatus">Phone Status</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="xuc_phoneStatus" readonly value="">
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="bsep"></div>
+                        <button class="btn btn-success" type="button" id="xuc_enable_dnd_btn" title="Enable DND">
+                            Enable DND
+                        </button>
+                        <button class="btn btn-danger" type="button" id="xuc_disable_dnd_btn" title="Disable DND">
+                            Disable DND
+                        </button>
+                    </div>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <div class="bsep"></div>
+                            <div class="col-xs-4">
+                                <label>
+                                    <input class="checkbox" id="xuc_naFwdEnabled" type="checkbox"/> Na Fwd
+                                </label>
+                                <input id="xuc_naFwdDestination" type="text" class="form-control fill" placeholder="number">
+                            </div>
+                            <div class="col-xs-4">
+                                <label>
+                                    <input class="checkbox" id="xuc_uncFwdEnabled" type="checkbox"/> Unc Fwd
+                                </label>
+                                <input id="xuc_uncFwdDestination" type="text" class="form-control fill" placeholder="number">
+                            </div>
+                            <div class="col-xs-4">
+                                <label>
+                                    <input class="checkbox" id="xuc_busyFwdEnabled" type="checkbox"/> Busy Fwd
+                                </label>
+                                <input id="xuc_busyFwdDestination" type="text" class="form-control fill" placeholder="number">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-3">
+                    <h3>Phone Hints</h3>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <button class="btn btn-danger" id="xuc_clean_phone_hints" title="Clear phone hints"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                            <button class="btn btn-success" id="xuc_subscribe_to_phone_hints" title="subscribe to phone hints">Subscribe</button>
+                            <button class="btn btn-danger" id="xuc_unsubscribe_from_phone_hints" title="unsubscribe from phone hints">Unsubscribe</button>
+                        </div>
+                        <div class="col-sm-10">
+                            <div class="sep"></div>
+                            <input id="xuc_phone_hint_subscription" type="text" class="form-control" value="" placeholder="Comma separated phone numbers" title="Comma separated phone numbers">
+                        </div>
+                    </div>
+                    <ul class="list-group" id="phone_hints"> </ul>
+                </div>
+                <div class="col-md-3">
+                    <h3>Device Selection</h3>
+                    <div class="col-sm-12">
+                        <button class="btn btn-success" id="xuc_toggle_ua" title="toggle device">Toggle device</button>
+                        <div class="bsep"></div>
+                        <input type="radio" id="phone" name="deviceType" value="phone">
+                        <label for="phone">phone</label><br>
+                        <input type="radio" id="webrtc" name="deviceType" value="webrtc">
+                        <label for="webrtc">webrtc</label><br>
+                    </div>
+                </div>
+            </div>
+              <div class="row">
+                <div class="col-md-3">
+                  <h3>Mobile Phone Push Notification</h3>
+                  <div class="row">
+                      <div class="form-group">
+                          <div class="col-sm-8">
+                              <input type="text" placeholder="Registration Token" class="form-control" id="xuc_mobile_push">
+                          </div>
+                          <button class="btn btn-success" id="xuc_mobile_push_set_btn" title="set mobile push token">Set</button>
+                          <button class="btn btn-danger" id="xuc_mobile_push_unregister" title="unregister mobile push token">Unregister</button>
+                      </div>
+                  </div>
+                </div>
+                <div class="col-md-offset-3 col-md-6">
+                    <h3>Phone Events</h3>
+                    <div class="form-group">
+                        <button class="btn btn-danger" id="xuc_clean_phone_events"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                        <button class="btn btn-success" id="xuc_get_current_calls_phone_events" title="Get phone events for current state">Get Current</button>
+                        <hr/>
+                        <div class="bsep"></div>
+                    </div>
+                    <ul class="list-group" id="phone_events"> </ul>
+                </div>
+              </div>
+              <div class="row">
+                  <div class="col-md-offset-6 col-md-6">
+                      <h3>WebRTC Events</h3>
+                      <div class="form-group">
+                          <button class="btn btn-danger" id="xuc_clean_webrtc_events"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                          <hr/>
+                          <div class="bsep"></div>
+                      </div>
+                      <ul class="list-group" id="webrtc_events"></ul>
+                  </div>
+              </div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="auth">
+            <div class="row">
+    <div class="col-md-6">
+        <h3>OIDC</h3>
+        <p>Logs-in using a OIDC JWT token from an issuer specified in your xuc configuration</p>
+        <div class="row form-group">
+            <label class="col-sm-2 control-label" for="OIDC_xuc_server">Xuc Address</label>
+            <div class="col-sm-3">
+                <input type="text" placeholder="address" class="form-control" id="OIDC_xuc_server" value="">
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-sm-2 control-label" for="OIDC_token">JWT Token</label>
+            <div class="col-sm-3">
+                <input type="text" placeholder="token" class="form-control" id="OIDC_token" value="">
+            </div>
+            <button class="btn btn-success" id="OIDC_submit" title="Submit">Sign in</button>
+        </div>
+    </div>
+</div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="contacts">
+            <div class="row">
+    <div class="col-md-4">
+        <h3>Directory</h3>
+        <div class="row">
+            <div class="col-sm-6">
+                <input type="text" placeholder="number or name" class="form-control" id="xuc_directory">
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-danger" id="xuc_clean_directory"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                <button class="btn btn-warning" type="button" id="xuc_lookup_btn" title="Search">
+                    <span class="glyphicon glyphicon-search" ></span>
+                </button>
+            </div>
+        </div><br>
+        <h3>Favorites</h3>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">contact_id</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" id="xuc_fav_contact_id" placeholder="id">
+            </div>
+            <label class="col-sm-4 control-label">source</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" id="xuc_fav_source" placeholder="source">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <br>
+                <button class="btn btn-danger" id="xuc_clean_favorite"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                <button class="btn btn-success" type="button" id="xuc_favorites_btn" title="Get favorites">
+                    List&nbsp;<span class="glyphicon glyphicon-star" ></span>
+                </button>
+                <button class="btn btn-warning" type="button" id="xuc_fav_add_btn" title="Add favorite">
+                    Add&nbsp;<span class="glyphicon glyphicon-star" ></span>
+                </button>
+                <button class="btn btn-danger" type="button" id="xuc_fav_rm_btn" title="Remove favorite">
+                    Remove&nbsp;<span class="glyphicon glyphicon-star" ></span>
+                </button>
+            </div>
+        </div>
+        <div>
+            <ul class="list-group" id="favorite_update_result"> </ul>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <h3>Personal Contacts</h3>
+        <div class="row">
+            <div class="col-sm-12">
+                <br>
+                <button class="btn btn-danger" id="xuc_clean_personal"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                <button class="btn btn-success" type="button" id="xuc_personal_list_btn" title="Get all personal contacts">List</button>
+                <a class="btn btn-warning" id="xuc_personal_export_btn" href="" title="Export all personal contacts" target="_blank">Export</a>
+                <label class="btn btn-warning"  title="Import personal contacts">
+                    Import <input type="file" style="display: none;" id="xuc_personal_import_btn">
+                </label>
+                <button class="btn btn-danger" type="button" id="xuc_personal_del_all_btn" title="Remove all personal contact">Remove all</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <h4>Add/Edit/Delete personal contact</h4>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-8">
+                    <input type="text" placeholder="Contact id" class="form-control" id="xuc_personal_contact_id">
+                    <br>
+                </div>
+                <button class="btn btn-success" id="xuc_personal_get_btn" title="get personal contact">Get</button>
+                <button class="btn btn-danger" id="xuc_personal_del_btn" title="remove personal contact">Remove</button>
+                <div class="col-sm-8">
+                    <input type="text" placeholder="Firstname" class="form-control" id="xuc_personal_firstname">
+                    <input type="text" placeholder="Lastname" class="form-control" id="xuc_personal_lastname">
+                    <input type="text" placeholder="Number" class="form-control" id="xuc_personal_number">
+                    <input type="text" placeholder="Mobile" class="form-control" id="xuc_personal_mobile">
+                    <input type="text" placeholder="Fax" class="form-control" id="xuc_personal_fax">
+                    <input type="text" placeholder="E-mail" class="form-control" id="xuc_personal_email">
+                    <input type="text" placeholder="Company" class="form-control" id="xuc_personal_company">
+                    <br/>
+                    <button class="btn btn-success" id="xuc_personal_add_btn" title="add personal contact">Add</button>
+                    <button class="btn btn-warning" id="xuc_personal_edit_btn" title="edit personal contact">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <br>
+        <div id="directoryresult" class="span8">
+        </div>
+    </div>
+</div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="history_tab">
+            <div class="row">
+    <div class="col-md-3">
+        <h3>Call History</h3>
+        <button class="btn btn-success" id="xuc_get_agent_call_history" title="get agent call history">Get Agent History</button>
+        <div class="col-sm-12">
+            <h4>User call history filters</h4>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">size</label>
+            <div class="col-sm-8">
+                <input type="number" class="form-control" id="xuc_uch_size" placeholder="Maximum number of results">
+            </div>
+            <label class="col-sm-4 control-label">days</label>
+            <div class="col-sm-8">
+                <input type="number" class="form-control" id="xuc_uch_days" placeholder="Days to return calls for">
+            </div>
+        </div>
+        <button class="btn btn-success" id="xuc_get_user_call_history" title="get user call history">Get User History</button>
+        <div class="col-sm-12">
+            <h4>Customer history filters</h4>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">field</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="xuc_cus_field" placeholder="field (e.g. src_num)">
+            </div>
+            <label class="col-sm-4 control-label">operator</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="xuc_cus_operator" placeholder="operand (e.g. =)">
+            </div>
+            <label class="col-sm-4 control-label">value</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="xuc_cus_value" placeholder="value (e.g. phone number)">
+            </div>
+        </div>
+        <button class="btn btn-success" id="xuc_find_customer_call_history" title="get customer call history">Get Customer History</button>
+        <div class="col-sm-12">
+            <h4>Queue Call History</h4>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="xuc_queue">name</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="xuc_queue" value="" placeholder="Queue name (or part)">
+            </div>
+        </div>
+        <button class="btn btn-success" id="xuc_get_queue_call_history" title="Queue call history">Get Queue history</button>
+    </div>
+    <div class="col-md-9">
+        <h3>History Results</h3>
+        <button class="btn btn-danger" id="xuc_clean_call_history"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <hr/>
+        <ul class="list-group" id="call_history"></ul>
+    </div>
+</div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="conferences_tab">
+            <div class="row">
+    <div class="col-md-6">
+        <h3>Conferences</h3>
+        <button class="btn btn-danger" id="xuc_clean_conferences"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_get_config_conferences" title="get conferences">Get conferences</button>
+        <ul class="list-group" id="conferences"> </ul>
+    </div>
+    <div class="col-md-6">
+        <h3>Conference Events</h3>
+        <button class="btn btn-danger" id="xuc_clean_conferencesEvent"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <hr/>
+        <ul class="list-group" id="conferencesEvents"> </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h3>Actions</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" placeholder="Conference number" class="form-control" id="xuc_numconf">
+                <input type="number" placeholder="Participant index" class="form-control" id="xuc_conf_index">
+                <input type="text" placeholder="Guest Extension" class="form-control" id="xuc_conf_exten">
+                <input type="text" placeholder="Variables (ex: var1=val1&var2=val2)" class="form-control" id="xuc_conf_variables">
+                <input type="radio" id="xuc_conf_role_user" name="xuc_conf_role" value="User" checked="checked">
+                <label for="xuc_conf_role_user">User</label><br>
+                <input type="radio" id="xuc_conf_role_organizer" name="xuc_conf_role" value="Organizer">
+                <label for="xuc_conf_role_organizer">Organizer</label><br>
+
+                <input type="checkbox" id="xuc_conf_earlyjoin" name="xuc_conf_earlyjoin">
+                <label for="xuc_conf_earlyjoin">Early Join</label>
+            </div>
+            <div class="col-md-8">
+                <button class="btn btn-danger" id="xuc_conference_muteme" title="Mute me" >
+                    <span class="glyphicon glyphicon-volume-off"></span> Me
+                </button>
+                <button class="btn btn-success" type="button" id="xuc_conference_unmuteme" title="UnMute me">
+                    <span class="glyphicon glyphicon-volume-up" ></span> Me
+                </button>
+                <button class="btn btn-danger" id="xuc_conference_muteall" title="Mute All" >
+                    <span class="glyphicon glyphicon-volume-off"></span> All
+                </button>
+                <button class="btn btn-success" type="button" id="xuc_conference_unmuteall" title="UnMute me">
+                    <span class="glyphicon glyphicon-volume-up" ></span> All
+                </button>
+                <button class="btn btn-danger" id="xuc_conference_mute" title="Mute participant" >
+                    <span class="glyphicon glyphicon-volume-off"></span> Participant
+                </button>
+                <button class="btn btn-success" type="button" id="xuc_conference_unmute" title="UnMute participant">
+                    <span class="glyphicon glyphicon-volume-up" ></span> Participant
+                </button>
+                <button class="btn btn-danger" type="button" id="xuc_conference_kick" title="Kick participant">
+                    <span class="glyphicon glyphicon-log-out"></span> Kick
+                </button>
+                <button class="btn btn-danger" type="button" id="xuc_conference_close" title="Close the conference for all participants">
+                    <span class="glyphicon glyphicon-stop"></span> Stop
+                </button>
+                <button class="btn btn-danger" type="button" id="xuc_conference_deafen" title="Deafen participant">
+                    <span class="glyphicon glyphicon-music"></span> Deafen
+                </button>
+                <button class="btn btn-success" type="button" id="xuc_conference_undeafen" title="Undeafen participant">
+                    <span class="glyphicon glyphicon-music"></span> Undeafen
+                </button>
+                <button class="btn btn-danger" type="button" id="xuc_conference_invite" title="Invite someone in a conference">
+                    <span class="glyphicon glyphicon-plus"></span> Invite
+                </button>
+                <button class="btn btn-info" type="button" id="xuc_conference_include" title="Include someone in a conference">
+                    <span class="glyphicon glyphicon-log-in"></span> Include
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+          </div>
+          <div role="tabpanel" class="tab-pane" id="flashtext_tab">
+            <div class="row">
+    <div class="col-md-4">
+        <h3>Message</h3>
+        <input type="text" placeholder="send to username" class="form-control" id="xuc_flash_username">
+        <textarea rows="4" cols="50" placeholder="Type your message here ...." class="form-control" id="xuc_flash_message"></textarea>
+        <div class="sep"></div>
+        <button class="btn btn-success" id="xuc_send_flash_text" title="send flash text">Send</button>
+    </div>
+    <div class="col-md-8">
+        <h3>Flash Text Events</h3>
+        <button class="btn btn-danger" id="xuc_clean_FlashTextEvent"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <hr/>
+        <ul class="list-group" id="flashTextEvents"> </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h3>Message History</h3>
+        <input type="text" placeholder="history with username" class="form-control" id="xuc_flash_username_history">
+        <div class="sep"></div>
+        <button class="btn btn-success" id="xuc_get_flash_text_history" title="get chat history">Get History</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h3>Message Read</h3>
+        <input type="text" placeholder="mark as read with username" class="form-control" id="xuc_read_flash_text">
+        <div class="sep"></div>
+        <button class="btn btn-success" id="xuc_mark_as_read_flash_text" title="mark as read">Mark as read</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h3>Get Display Name</h3>
+        <input type="text" placeholder="get display name by username" class="form-control" id="xuc_display_name_by_username">
+        <div class="sep"></div>
+        <button class="btn btn-danger" id="xuc_clean_display_name"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_get_display_name_by_username" title="Get display name by username">Get display name</button>
+        <ul class="list-group" id="display_name"> </ul>
+    </div>
+</div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="queues_tab">
+            <div class="row">
+    <div class="col-md-4">
+        <h3>Queues</h3>
+        <button class="btn btn-danger" id="xuc_clean_queue_config"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_get_config_queues" title="get queues">Get queues</button>
+        <button class="btn btn-success" id="xuc_queues_recording_on" title="activate all">Activate Rec</button>
+        <button class="btn btn-danger" id="xuc_queues_recording_off" title="deactivate all">Deactivate Rec</button>
+        <ul class="list-group" id="queue_config"> </ul>
+    </div>
+    <div class="col-md-4">
+        <h3>Queue Members</h3>
+        <button class="btn btn-danger" id="xuc_clean_queue_member"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_get_config_queuemembers" title="get queuemembers">Get Q members</button>
+        <ul class="list-group" id="queue_member"> </ul>
+    </div>
+
+    <div class="col-md-4">
+        <h3>Queue default membership</h3>
+        <button class="btn btn-danger" id="xuc_membership_clean"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_membership_get" title="Get default membership">Get</button>
+        <div class="row">
+            <div class="col-sm-6">
+                <input type="text" class="form-control" placeholder="[{&quot;queueId&quot;:1, &quot;penalty&quot;:5}]" id="xuc_membership_data" value="">
+            </div>
+            <div class="col-sm-6">
+                <button class="btn btn-success" id="xuc_membership_set" title="Set default membership">Set</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <input type="text" class="form-control" placeholder="[1,4]" id="xuc_membership_users" value="">
+            </div>
+            <div class="col-sm-6">
+                <button class="btn btn-success" id="xuc_membership_apply" title="Apply default for selected users">Apply all</button>
+            </div>
+        </div>
+        <hr>
+
+        <ul class="list-group" id="xuc_membership_event"></ul>
+    </div>
+<div class="row">
+    <div class="col-md-6">
+        <h3>Dial From Queue</h3>
+        <input type="text" placeholder="number to call" class="form-control" id="xuc_dial_from_queue_destination">
+        <input type="text" placeholder="ID of queue to call from" class="form-control" id="xuc_dial_from_queue_id">
+        <input type="text" placeholder="caller name" class="form-control" id="xuc_dial_from_queue_caller_id_name">
+        <input type="text" placeholder="caller number" class="form-control" id="xuc_dial_from_queue_caller_id_number">
+        <input type="text" placeholder="variables (ex: var1=val1&var2=val2)" class="form-control" id="xuc_dial_from_variables">
+        <div class="sep"></div>
+        <button class="btn btn-success" id="xuc_dial_from_queue_btn" title="Dial from queue">Dial from queue</button>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <h3>Queue Dissuasion</h3>
+        <div class="input-group">
+            <input id="dissuasion_file_name" type="text" class="form-control" placeholder="New dissuasion file name">
+            <span class="input-group-btn">
+                <button id="set_dissuasion_sound_file" class="btn btn-success" type="button">Change dissuasion to a sound file</button>
+            </span>
+        </div>
+        <div class="input-group">
+            <input id="dissuasion_queue_name" type="text" class="form-control" placeholder="New dissuasion queue name">
+            <span class="input-group-btn">
+                <button id="set_dissuasion_queue" class="btn btn-success" type="button">Change dissuasion to a queue</button>
+            </span>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h3>Queue Stats</h3>
+        <button class="btn btn-danger" id="xuc_clean_queue_stats"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_subscribe_to_queue_stats_btn" title="Subscribe to queue stats">Subscribe to queue stats</button>
+        <hr>
+        <ul class="list-group" id="queue_stats">
+        </ul>
+    </div>
+    <div class="col-md-3">
+        <h3>Queue Calls</h3>
+        <div class="row">
+            <div class="col-sm-12">
+                <button class="btn btn-danger" id="xuc_clean_queue_calls"><span class="glyphicon glyphicon-remove-circle"></span></button>
+                <button class="btn btn-success" id="xuc_subscribe_to_queue_calls" title="subscribe to queue calls">Subscribe to Queue calls</button>
+                <button class="btn btn-danger" id="xuc_unsubscribe_to_queue_calls" title="unsubscribe to queue calls">Unsubscribe</button>
+            </div>
+            <div class="col-sm-10">
+                <div class="sep"></div>
+                <input id="xuc_queue_id_calls" type="text" class="form-control" value="" placeholder="enter Queue Id" title="enter Queue Id">
+            </div>
+        </div>
+        <ul class="list-group" id="queue_calls"> </ul>
+        <h4>Retrieve queue call</h4>
+        <textarea rows="4" cols="30" id="xuc_queuecall" placeholder="{&quot;position&quot;:1,&quot;name&quot;:null,&quot;number&quot;:&quot;1234&quot;,&quot;queueTime&quot;:&quot;2019-12-09T15:57:40.234+01:00&quot;,&quot;channel&quot;:&quot;SIP/trunk-00000004&quot;}" class="form-control"></textarea>
+        <div class="sep"></div>
+        <button class="btn btn-success" id="xuc_retrieve_queuecall" title="send flash text">Retrieve</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-6">
+        <h3>Queue Dissuasion events</h3>
+        <button class="btn btn-danger" id="xuc_clean_queue_dissuasion"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <hr>
+        <ul id="xuc_queue_dissuasion" class="list-group"></ul>
+    </div>
+</div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="agents_tab">
+            <div class="row">
+    <div class="col-md-6">
+        <h3>Agent</h3>
+        <div class="form-group row">
+            <label class="col-sm-2 control-label" for="xuc_agentPhoneNumber">Line</label>
+            <div class="col-sm-3">
+                <input type="text" placeholder="phone number" class="form-control" id="xuc_agentPhoneNumber" value="">
+            </div>
+            <div class="col-sm-7">
+                <button class="btn btn-success" id="xuc_login_btn" title="Agent Log in">Login</button>
+                <button class="btn btn-danger" id="xuc_logout_btn" title="Agent Log out">Logout</button>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 control-label" for="xuc_agentPhoneNumber">Pause</label>
+            <div class="col-sm-3">
+                <input type="text" placeholder="reason" class="form-control" id="agent_pause_reason">
+            </div>
+            <div class="col-sm-7">
+                <button class="btn btn-warning" id="xuc_pause_btn" title="Pause">Pause</button>
+                <button class="btn btn-info" id="xuc_unpause_btn" title="Un Pause">UnPause</button>
+            </div>
+        </div>
+        <div class="row">
+            <label class="col-sm-2 control-label" for="xuc_agentData">Status</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" id="xuc_agentStatus" readonly value="">
+            </div>
+        </div>
+        <div class="row">
+            <label class="col-sm-2 control-label" for="xuc_agentListenStatus">Listen Status</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" id="xuc_agentListenStatus" readonly value="">
+            </div>
+        </div>
+        <div class="row">
+            <label class="col-sm-2 control-label" for="xuc_agentData">Data</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" id="xuc_agentData" readonly value="">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="col-sm-12">
+            <h3>Agent Management</h3>
+        </div>
+        <div class="col-sm-8">
+            <label class="control-label" for="xuc_agentId_target">Agent Id</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="xuc_agentId_target" value="" size="5" placeholder="Agent Id">
+                <span class="btn btn-success input-group-addon" id="xuc_listen_agent_btn" title="listen agent">Listen</span>
+            </div>
+            <label class="control-label" for="xuc_queueId">Queue Id</label>
+            <input type="text" class="form-control" id="xuc_queueId" value="" size="5" placeholder="Queue Id">
+            <label class="control-label" for="xuc_penalty">Penalty</label>
+            <input type="text" class="form-control" id="xuc_penalty" value="" size="5" placeholder="Penalty">
+            <div class="bsep"></div>
+            <button class="btn btn-primary" id="xuc_set_agent_queue_btn" title="Set agent queue">
+                <span class="glyphicon glyphicon-plus"></span>
+            </button>
+            <button class="btn  btn-primary" id="xuc_remove_agent_from_queue_btn" title="Remove agent from queue">
+                <span class="glyphicon glyphicon-minus"></span>
+            </button>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="col-sm-12">
+            <h3>Call Recording</h3>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="xuc_agentMonitorState">Recording State</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="xuc_agentMonitorState" readonly value="">
+            </div>
+            <div class="col-sm-12">
+                <button class="btn btn-success" id="xuc_monitorpause_btn" title="Monitor pause">Pause</button>
+                <button class="btn btn-danger" id="xuc_monitorunpause_btn" title="Monitor unpause">Unpause</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <h3>Agent List</h3>
+        <button class="btn btn-danger" id="xuc_clean_agent_config"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_get_config_agents" title="get agents">Get agents</button>
+        <ul class="list-group" id="agent_config"> </ul>
+    </div>
+    <div class="col-md-3">
+        <h3>Agent statistics</h3>
+        <button class="btn btn-danger" id="xuc_clean_agent_statistic"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_subscribe_to_agent_statistic_btn" title="Subcribe">Subscribe</button>
+        <ul class="list-group" id="agent_stats"> </ul>
+    </div>
+    <div class="col-md-6">
+        <h3>Agent States Events</h3>
+        <div class="form-group">
+            <button class="btn btn-danger" id="xuc_clean_agent_events"><span class="glyphicon glyphicon-remove-circle"></span></button>
+            <button class="btn btn-success" id="xuc_subscribe_to_agent_event_btn" title="Subscribe to Agent Events">Subscribe</button>
+            <span> </span>
+            <button class="btn btn-success" id="xuc_get_agentstates" title="get agent states">Get States</button>
+        </div>
+        <ul class="list-group" id="agentstates"> </ul>
+        <ul class="list-group" id="agent_events"> </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <h3>Agent Directory</h3>
+        <button class="btn btn-danger" id="xuc_clean_agent_directory"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_get_agent_directory" title="agent directory">agent directory</button>
+        <ul class="list-group" id="agent_directory"> </ul>
+    </div>
+    <div class="col-md-3">
+        <h3>Agent Groups</h3>
+        <button class="btn btn-danger" id="xuc_clean_agentgroup_config"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_get_config_agentgroups" title="get agent groups">Get agent groups</button>
+        <ul class="list-group" id="agentgroup_config"> </ul>
+    </div>
+    <div class="col-md-6">
+        <h3>Callback Lists</h3>
+        <button class="btn btn-danger" id="xuc_clean_callbacks"><span class="glyphicon glyphicon-remove-circle"></span></button>
+        <button class="btn btn-success" id="xuc_get_callback_lists" title="get callback lists">Get Callback Lists</button>
+        <ul class="list-group" id="callbacks"> </ul>
+    </div>
+</div>
+          </div>
+          <div role="tabpanel" class="tab-pane" id="meetingrooms_tab">
+            <div class="row">
+<hr/>
+  <div class="col-md-4">
+    <h3>Meeting room events triggers</h3>
+      <button class="btn btn-success" id="xuc_start_meeting_room">Call meeting room</button>
+      <button class="btn btn-danger" id="xuc_end_meeting_room">Hang up meeting room</button>
+  </div>
+
+  <div class="col-md-4">
+    <h3>Meeting rooms events</h3>
+    <button class="btn btn-danger" id="xuc_clean_meetingroomsEvent"><span class="glyphicon glyphicon-remove-circle"></span></button>
+    <button class="btn btn-success" id="xuc_subscribe_to_video_status_events">Subscribe</button>
+    <button class="btn btn-danger" id="xuc_unsubscribe_from_video_status_events">Unsubscribe</span></button>
+    <hr/>
+    <ul class="list-group" id="meetingroomsEvents"> </ul>
+  </div>
+  <div class="col-md-4">
+    <h3>Meeting room invitation events</h3>
+    <div class="form-group">
+      <label class="col-sm-5 control-label">Invitee username</label>
+      <div class="col-sm-7">
+        <input type="text" class="form-control" id="meeting-room-invitee-username" placeholder="username">
+      </div>
+      <label class="col-sm-5 control-label">Token</label>
+      <div class="col-sm-7">
+        <input type="text" class="form-control" id="meeting-room-invitee-token" placeholder="token" value="Some.To.Ken">
+      </div>
+      <label class="col-sm-5 control-label">Id Sequence</label>
+      <div class="col-sm-7">
+        <input type="number" class="form-control" id="meeting-room-invitee-sequence" placeholder="Sequence number" value="0">
+      </div>
+      <button  class="btn btn-success" type="button" id="btn-invite-meeting-room" title="Invite user to conference"><span class="glyphicon glyphicon-share-alt"></span></button>
+      <button  class="btn btn-info" type="button" id="btn-ack-meeting-room" title="Send ack"><span class="glyphicon glyphicon-check"></span></button>
+      <button  class="btn btn-success" type="button" id="btn-accept-meeting-room" title="Accept invitation"><span class="glyphicon glyphicon-ok"></span></button>
+      <button  class="btn btn-danger" type="button" id="btn-refuse-meeting-room" title="Refuse invitation"><span class="glyphicon glyphicon-remove"></span></button>
+      <button class="btn btn-danger" id="btn-clean-meeting-room" title="Empty event list"><span class="glyphicon glyphicon-remove-circle"></span></button>
+    </div>
+    <ul class="list-group" id="meeting-room-invitation-events"> </ul>
+    <hr/>
+  </div>
+</div>
+
+
+
+          </div>
+          <div role="tabpanel" class="tab-pane" id="userPreference_tab">
+            <div class="row">
+    <div class="col-md-6">
+        <h3>User Preferences</h3>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Set User Preference</label>
+            <div class="col-sm-3">
+                <input type="text" placeholder="Preference key" class="form-control" id="xuc_setUserPreferenceKey" value="">
+                <input type="text" placeholder="Preference value" class="form-control" id="xuc_setUserPreferenceValue" value="">
+                <input type="text" placeholder="Preference type value" class="form-control" id="xuc_setUserPreferenceValueType" value="">
+            </div>
+            <div class="col-sm-7">
+                <button class="btn btn-success" id="xuc_setUserPreference" title="Set user preference">Set new user preference value</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h3>User Preference Events</h3>
+        <div class="form-group">
+            <button class="btn btn-danger" id="clean_userPreference_events"><span class="glyphicon glyphicon-remove-circle"></span></button>
+            <hr/>
+            <div class="bsep"></div>
+        </div>
+        <ul class="list-group" id="userPreference_events"></ul>
+    </div>
+</div>
+
+          </div>
+        </div>
+      <hr>
+      <footer>
+        <p>&copy; Avencall 2019</p>
+      </footer>
+    </div> <!-- /container -->
+    <script src="/xucassets/javascripts/pages/helper.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sample.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleAuth.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleContacts.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleHistory.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleConferences.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleFlashText.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleQueues.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleAgents.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleMeetingRooms.js" type="text/javascript"></script>
+    <script src="/xucassets/javascripts/pages/sampleUserPreference.js" type="text/javascript"></script>
+  </body>
+  </html>
